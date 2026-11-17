@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#10152b">
+<title>创想大师｜灵感世界修复计划</title>
+<style>
+:root{--bg:#10152b;--mint:#9fffd0;--pink:#ff9acb;--gold:#ffd58b;--violet:#a99cff}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:#fff;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulation}
+#app{position:relative;width:100%;height:100dvh;overflow:hidden;background:radial-gradient(ellipse at 50% 20%,#283b5d,#11152b 60%,#090d1d)}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#world{display:block;z-index:1;transition:filter .52s cubic-bezier(.2,.7,.2,1)}#bg{transition:filter .52s cubic-bezier(.2,.7,.2,1)}
+.top{position:absolute;z-index:3;top:calc(env(safe-area-inset-top) + 12px);left:15px;right:15px;display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.12em;color:#c6d8e9;pointer-events:none}
+.brand{display:flex;align-items:center;gap:9px}.logo{width:19px;height:19px;border:2px solid var(--mint);border-radius:50%;box-shadow:0 0 16px #9fffd077;position:relative}.logo:after{content:"";position:absolute;width:7px;height:7px;background:var(--pink);border-radius:50%;right:-3px;top:-2px}
+.pill{padding:7px 10px;border:1px solid #ffffff30;border-radius:20px;background:#10152b88}
+.screen{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 18px 25px;overflow:auto;background:radial-gradient(ellipse at 50% 35%,#293b5c88,transparent 65%)}
+.kicker{font-size:10px;letter-spacing:.28em;color:var(--mint);font-weight:800;margin-bottom:12px}
+h1{font-size:clamp(42px,11vw,76px);line-height:1.02;margin:0;font-weight:1000;letter-spacing:.04em;text-shadow:0 0 30px #9fffd044}h1 span{color:var(--gold)}
+.subtitle{max-width:520px;color:#c4d2e5;font-size:13px;line-height:1.9;margin:14px auto}
+.hero{height:190px;width:min(420px,90vw);position:relative;display:grid;place-items:center}
+.orbit{position:absolute;width:230px;height:100px;border:1px solid #9fffd077;border-radius:50%;transform:rotate(-20deg);box-shadow:0 0 25px #9fffd022}.orbit.b{width:150px;height:210px;transform:rotate(32deg);border-color:#b7a7ff77}
+.sprite{font-size:82px;filter:drop-shadow(0 0 25px #9fffd0aa);animation:float 2.6s ease-in-out infinite}.spark{position:absolute;font-size:25px;animation:twinkle 1.8s infinite}.s1{left:15%;top:22%;color:var(--gold)}.s2{right:15%;bottom:18%;color:var(--pink);animation-delay:-.8s}
+@keyframes float{50%{transform:translateY(-10px)}}@keyframes twinkle{50%{opacity:.35;transform:scale(.7) rotate(30deg)}}
+.primary{background:linear-gradient(100deg,#7edbb9,#8d8af4);color:#10152b;font-weight:900;padding:14px 28px;border-radius:14px;box-shadow:0 8px 26px #8d8af455;min-height:48px}.secondary{background:#ffffff12;border:1px solid #ffffff30;padding:12px 20px;border-radius:12px;font-weight:750}
+.hint{font-size:11px;color:#94a7c0;line-height:1.7;margin-top:12px}
+#hud{display:none;position:absolute;z-index:3;top:calc(env(safe-area-inset-top) + 58px);left:12px;right:12px;justify-content:space-between;align-items:flex-start;pointer-events:none;gap:8px}
+.stats{display:flex;gap:6px;flex-wrap:wrap}.stat{background:#10152be8;border:1px solid #ffffff25;border-radius:11px;padding:8px 10px;font-size:11px;color:#d7e4f2}.stat b{color:var(--mint);margin-left:4px}.hearts{font-size:18px;letter-spacing:3px;color:#ff8eb6;background:#24152be8;border:1px solid #ff8eb666;border-radius:11px;padding:7px 10px;white-space:nowrap}
+#jump{display:none;position:absolute;z-index:5;right:20px;bottom:calc(22px + env(safe-area-inset-bottom));width:84px;height:84px;border-radius:50%;background:#a99cff40;border:2px solid #c4baff;box-shadow:0 0 25px #a99cff66;font-weight:1000}
+#pause{display:none;position:absolute;z-index:5;right:12px;top:calc(env(safe-area-inset-top) + 115px);padding:9px 13px;border-radius:12px;background:#1b2340;border:1px solid #ffffff44}
+.overlay{background:#0c1224d9;backdrop-filter:blur(10px);z-index:8}
+.panel{width:min(510px,100%);padding:22px;border:1px solid #ffffff2a;border-radius:22px;background:linear-gradient(145deg,#263451,#151b32);box-shadow:0 20px 70px #0007;text-align:left}
+.panel h2{font-size:clamp(24px,6vw,34px);margin:4px 0 10px}.panel p{font-size:13px;line-height:1.85;color:#c4d2e5;margin:8px 0}
+.question-no{font-size:10px;letter-spacing:.2em;color:var(--mint);font-weight:900}
+.choices{display:grid;gap:9px;margin-top:18px}.choice{display:flex;gap:12px;align-items:center;text-align:left;padding:13px;border:1px solid #ffffff24;border-radius:13px;background:#ffffff0a;line-height:1.55;font-size:13px}.choice:active{transform:scale(.985);background:#9fffd022}.letter{width:30px;height:30px;flex:none;border-radius:9px;background:#9fffd01b;color:var(--mint);display:grid;place-items:center;font-weight:900}
+#toast{position:absolute;z-index:6;top:calc(env(safe-area-inset-top) + 125px);left:50%;transform:translateX(-50%);background:#182441;border:1px solid #ffffff30;border-radius:30px;padding:8px 14px;font-size:12px;opacity:0;transition:.2s;pointer-events:none;white-space:nowrap}
+#result{display:none;z-index:10;justify-content:center}
+.result-layout{display:grid;grid-template-columns:minmax(130px,220px) minmax(280px,480px);width:min(720px,100%);gap:0;align-items:stretch;text-align:left}
+.avatar-card{border:2px solid var(--accent);border-right:0;border-radius:20px 0 0 20px;background:linear-gradient(160deg,#fff,#f0f5ff);color:#25314a;padding:18px 12px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center}
+.avatar{font-size:clamp(85px,16vw,145px);filter:drop-shadow(0 8px 12px color-mix(in srgb,var(--accent) 45%,transparent));margin:auto 0}
+.avatar-card small{font-size:10px;letter-spacing:.16em;color:var(--accent);font-weight:900}
+.result-panel{border:2px solid var(--accent);border-radius:0 20px 20px 0;background:#fff;color:#273149;padding:20px;max-height:calc(100dvh - 100px);overflow:auto}
+.result-panel .eyebrow{font-size:10px;letter-spacing:.18em;color:var(--accent);font-weight:900}
+.result-panel h2{font-size:clamp(27px,5vw,40px);line-height:1.1;color:var(--accent);margin:7px 0}
+.result-panel p{font-size:13px;line-height:1.8;color:#536078}
+.scorebox{border:1px solid color-mix(in srgb,var(--accent) 35%,white);background:color-mix(in srgb,var(--accent) 8%,white);padding:13px;border-radius:13px;margin:12px 0}
+.scorebig{font-size:34px;color:var(--accent);font-weight:1000}.meter{height:7px;background:#e9eaf0;border-radius:9px;overflow:hidden;margin-top:8px}.meter i{display:block;height:100%;background:var(--accent);width:0}
+.mini-stats{display:flex;gap:7px;margin:12px 0}.mini{flex:1;padding:9px 5px;border-radius:10px;background:#f3f5f9;text-align:center}.mini b{display:block;font-size:21px;color:var(--accent)}.mini span{font-size:10px;color:#738098}
+.result-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.result-actions button{flex:1;min-width:120px}
+@media(max-width:620px){.result-layout{display:flex;flex-direction:column;max-width:460px}.avatar-card{border:2px solid var(--accent);border-radius:17px 17px 0 0;flex-direction:row;min-height:118px;padding:8px 15px}.avatar{font-size:80px;margin:0}.result-panel{border-radius:0 0 17px 17px;padding:16px;max-height:none}.screen#result{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top) + 50px)}}
+@media(max-height:650px){.hero{height:130px}.sprite{font-size:65px}.screen{padding-top:52px}.panel{padding:16px}.choice{padding:9px}}
+#narrative{display:none;position:absolute;z-index:4;left:50%;top:calc(env(safe-area-inset-top) + 112px);bottom:auto;transform:translateX(-50%);width:min(760px,calc(100% - 34px));padding:13px 18px 14px;border:1px solid #d7fff04a;border-radius:16px;background:linear-gradient(100deg,#101a2de8,#1b2946e8);box-shadow:0 12px 34px #0005;backdrop-filter:blur(8px);pointer-events:none;text-align:left}#narrative .nhead{font-size:11px;letter-spacing:.16em;color:#9fffd0;font-weight:900;margin-bottom:5px}#narrative .nbody{font-size:clamp(13px,2vw,16px);line-height:1.8;color:#f1f6ff;min-height:2.8em}#narrative .nquote{font-size:11px;line-height:1.6;color:#ffd58b;margin-top:5px}@media(max-width:600px){#narrative{top:calc(env(safe-area-inset-top) + 112px);bottom:auto;padding:10px 13px}#narrative .nbody{font-size:13px;line-height:1.65}}
+</style></head>
+<body><div id="app">
+<canvas id="bg"></canvas><canvas id="world"></canvas>
+<div class="top"><div class="brand"><i class="logo"></i><b>IMAGINATION WORLD / 创想大师</b></div><span class="pill" id="chapter">灵感世界 · 序章</span></div>
+<section class="screen" id="intro">
+ <div class="kicker">A JOURNEY TO REBUILD INSPIRATION</div><h1>创想<span>大师</span></h1>
+ <p class="subtitle">灵感核心失控，世界里的色彩、声音与奇妙想法散落各处。<br>跟随小精灵出发，把灵感重新带回世界。</p>
+ <div class="hero"><div class="orbit"></div><div class="orbit b"></div><span class="sprite">🧚</span><span class="spark s1">✦</span><span class="spark s2">✧</span></div>
+ <button class="primary" id="begin">开启灵感旅程</button><div class="hint">电脑：空格 / ↑ 跳跃　·　手机：点击跳跃按钮<br>第一章就是跑酷探索：边跑边看剧情变化，跳跃穿越灵感世界</div>
+</section>
+<section class="screen overlay" id="story" style="display:none">
+ <div class="panel"><div class="question-no">PROLOGUE / 灵感世界的异变</div><h2 id="storyHead">灵感正在呼吸</h2><p id="storyBody">这里是灵感汇聚的地方。每一个奇妙的想法，都能在这里找到自己的形态。</p><p id="storyAside" style="color:#9fffd0">“所有灵感汇聚于核心，又从核心流向世界的每一个角落。”</p><button class="primary" id="storyNext">继续探索</button></div>
+</section>
+<section class="screen overlay" id="question" style="display:none">
+ <div class="panel"><div class="question-no" id="qNo">INTERACTION 01 / 05</div><h2 id="qTitle"></h2><p id="qContext"></p><div class="choices" id="choiceList"></div></div>
+</section>
+<section class="screen overlay" id="pauseScreen" style="display:none">
+ <div class="panel"><div class="question-no">PAUSED</div><h2>旅程暂时停靠</h2><p>灵感不会消失，准备好就继续前进。</p><button class="primary" id="resume">继续旅程</button> <button class="secondary" id="restart">重新开始</button></div>
+</section>
+<section class="screen overlay" id="result" style="display:none">
+ <div class="result-layout">
+  <div class="avatar-card" id="avatarCard"><small>YOUR INSPIRATION TYPE</small><div class="avatar" id="avatar">🧚</div><small id="typeEnglish">CREATOR</small></div>
+  <div class="result-panel" id="resultPanel"><div class="eyebrow">INSPIRATION ARCHIVE / 001</div><h2 id="typeName">凯瑞特</h2><p id="typeQuote"></p><div class="scorebox"><div class="eyebrow">灵感共鸣指数</div><div class="scorebig" id="typeScore">92</div><p id="typeDesc"></p><div class="meter"><i id="meterFill"></i></div></div><div class="mini-stats"><div class="mini"><b id="finalScore">0</b><span>跑酷积分</span></div><div class="mini"><b id="finalShard">0</b><span>灵感碎片</span></div><div class="mini"><b id="finalSpecial">0</b><span>特殊灵感</span></div></div><p id="typeAdvice"></p><div class="result-actions"><button class="primary" id="playAgain">再次出发</button><button class="secondary" id="share">复制人格卡</button></div></div>
+ </div>
+</section>
+<div id="narrative"><div class="nhead" id="narrativeHead"></div><div class="nbody" id="narrativeBody"></div><div class="nquote" id="narrativeQuote"></div></div>
+<div id="storyBanner" style="display:none;position:absolute;z-index:3;top:calc(env(safe-area-inset-top) + 54px);left:18px;right:18px;height:4px;border-radius:9px;background:#ffffff20;overflow:hidden;pointer-events:none"><i id="storyProgress" style="display:block;width:0;height:100%;background:linear-gradient(90deg,#9fffd0,#ffd58b);box-shadow:0 0 12px #9fffd0"></i></div>
+<div id="hud"><div class="stats"><div class="stat">积分<b id="score">0</b></div><div class="stat">✧<b id="shards">0</b></div><div class="stat">🎤<b id="mics">0</b></div><div class="stat">🖌️<b id="brushes">0</b></div></div><div class="hearts" id="hearts">♥ ♥ ♥</div></div>
+<button id="pause">Ⅱ 暂停</button><button id="jump">跳跃 / 二连跳 ↑</button><div id="toast"></div>
+</div>
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id), bg=$("bg"), world=$("world"), bctx=bg.getContext("2d"),ctx=world.getContext("2d");
+let W=0,H=0,dpr=1, raf=0,loopToken=0,last=0,active=false,paused=false,mode="story",distance=0,speed=260,score=0,shards=0,mics=0,brushes=0,lives=3,playerY=0,vy=0,onGround=true,jumpsLeft=2,items=[],obstacles=[],particles=[],stars=[],storyStep=0,qIndex=0,answers=[],toastTimer=0,invuln=0,hitFlash=0,prologueDistance=0,sceneTime=0,prologueSpawn=0,prologueLength=2150;
+const ground=()=>H*.79, playerX=()=>Math.min(W*.22,115), gravity=1550;
+const questions=[
+ {q:"面对突然出现的灵感，你会怎么做？",c:"一团明亮的灵感从眼前掠过。小精灵决定追上它。",a:["立刻抓住它，马上尝试把想法实现出来。","先不急着行动，看看能不能发现更多可能性。","尝试用不同的方式接近它，想看看会发生什么。"]},
+ {q:"什么最容易触发你的创作灵感？",c:"记忆与想象交织，旧画面、情绪和细微变化在眼前闪现。",a:["过去值得回味的故事和记忆。","当下突然涌现的情绪与感受。","身边细微的变化。"]},
+ {q:"如果可以创造一个独属于你的世界，你更想创造什么？",c:"麦克风与画笔重新出现，声音和色彩在空间里流动。",a:["一个充满独特视觉、色彩和氛围的空间。","一个由声音、节奏与律动构成的世界。","一个打破现实规则、充满奇妙想象的世界。"]},
+ {q:"面对一个没有限制的创作挑战，你会怎么做？",c:"灵感风暴席卷道路，但不同灵感之间仍有微弱联系。",a:["不被现有规则限制，大胆尝试。","暂时放慢脚步，顺着内心继续探索。","先收集眼前的线索和素材，再寻找新的突破口。"]},
+ {q:"你希望自己的作品最终留下什么？",c:"小精灵抵达灵感核心，发现修复世界需要重新收集散落的灵感。",a:["一个令人眼前一亮、打破常规的创意。","一种能够被理解、产生共鸣的感受。","一个值得反复探索的完整世界，让人沉浸其中。"]}
+];
+// 以下旁白依据策划案的核心概念与元素表改写；策划案没有提供逐字对白，
+// 因此这些是游戏内叙事文案，不冒充原稿原句。
+const storyCards=[
+ ["灵感世界 · 日常奔跑","这里是灵感世界。色彩、声音与奇妙想法在空中生长，远处的灵感核心持续发光。","旁白｜每个奇妙想法，都有自己的形态。"],
+ ["记忆与想象","灵感有时来自过去的记忆，有时来自此刻的情绪，也可能藏在身边一个微小变化里。","旁白｜留心观察，熟悉的日常也会带来新发现。"],
+ ["声音与色彩","麦克风收集声音与节奏，画笔收集色彩与形状。不同的表达方式，都能让想法成形。","旁白｜听见节奏，也看见色彩。"],
+ ["压力与灵感风暴","忙碌、手机提醒和DDL闹钟不断打断思路。避开压力，别让灵感碎片再次散失。","旁白｜穿过风暴，把注意力带回创作。"],
+ ["抵达灵感核心","散落的灵感逐渐汇聚。面对核心，你会选择怎样的创作方式，又希望作品留下什么？","旁白｜带着一路发现的灵感，决定下一次出发。"]
+];
+const archetypes=[
+ {id:"Creator",name:"凯瑞特",en:"CREATOR",emoji:"🚀",color:"#e58b45",quote:"灵感没有边界，脑洞也没有刹车。",desc:"你擅长从无到有，把大胆念头变成新鲜创意。你不太愿意被既有规则限制，越是未知的命题，越能点燃你的创造欲。",advice:"继续保持想象力的锋芒，也给灵感一点落地的时间，让奇思妙想真正成为作品。"},
+ {id:"Collector",name:"柯莱特",en:"COLLECTOR",emoji:"🧩",color:"#399b8c",quote:"我的灵感库存，主打一个有备无患。",desc:"你善于观察、收集和整理素材。一个细节、一段声音、一张旧照片，都可能成为未来创作的起点。你的灵感来自持续积累。",advice:"建立自己的灵感素材库，定期重新组合旧素材，新的连接往往就在其中。"},
+ {id:"Historian",name:"希斯托安",en:"HISTORIAN",emoji:"📜",color:"#b27a4d",quote:"故事没有过期，回忆永远有新版本！",desc:"你容易从记忆、经历和故事中找到创作入口。过去并不是静止的档案，而是可以不断被重新理解、重新讲述的素材。",advice:"把记忆写下来，也尝试用新的媒介讲述旧故事，让个人经验与当下产生联系。"},
+ {id:"Empath",name:"恩佩斯",en:"EMPATH",emoji:"💗",color:"#d96f91",quote:"情绪价值拉满，创作灵感也拉满。",desc:"你对情绪和感受敏锐，擅长捕捉人与人之间细微的共鸣。你希望作品不仅好看或有趣，也能让人感受到某种真实。",advice:"记录情绪变化，练习把感受转化为声音、画面或文字，让共鸣拥有具体形状。"},
+ {id:"Painter",name:"潘特",en:"PAINTER",emoji:"🎨",color:"#5b9a70",quote:"世界是默认皮肤，我来负责换装。",desc:"你对色彩、视觉和氛围有天然的敏感度。你喜欢用画面组织想法，也愿意通过风格和形式让熟悉的事物焕然一新。",advice:"多尝试不同的视觉语言，把颜色、构图和空间当作表达观点的工具。"},
+ {id:"Muse",name:"缪斯",en:"MUSE",emoji:"🎵",color:"#8a75cf",quote:"灵感可能会迟到，但我的 BGM 不能停。",desc:"你容易被声音、节奏和律动激发。音乐不仅是背景，更像一条通往情绪与想象的通道，能帮你找到创作的节拍。",advice:"收集声音片段与音乐线索，试着让节奏参与叙事，而不只是作为装饰。"},
+ {id:"Pioneer",name:"派尼尔",en:"PIONEER",emoji:"🧭",color:"#4288bb",quote:"地图没有标注的地方，才最值得出发！",desc:"你喜欢探索未知、尝试新路径，也愿意在不确定中寻找机会。你不急着得到标准答案，更在意旅程中发现的新可能。",advice:"为自己设置小型探索任务，跨领域体验新事物，再把意外发现带回熟悉的创作领域。"}
+];
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;[bg,world].forEach(c=>{c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);c.style.width=W+"px";c.style.height=H+"px"});bctx.setTransform(dpr,0,0,dpr,0,0);ctx.setTransform(dpr,0,0,dpr,0,0);stars=Array.from({length:65},(_,i)=>({x:Math.random()*W,y:Math.random()*H*.72,r:Math.random()*2+.4,p:Math.random()*6.28}));drawBg()}
+function drawBg(){bctx.clearRect(0,0,W,H);let g=bctx.createLinearGradient(0,0,0,H);g.addColorStop(0,"#1e3150");g.addColorStop(.62,"#151d37");g.addColorStop(1,"#10152b");bctx.fillStyle=g;bctx.fillRect(0,0,W,H);stars.forEach(s=>{bctx.globalAlpha=.25+.5*(.5+.5*Math.sin(performance.now()/900+s.p));bctx.fillStyle="#d9f8ff";bctx.beginPath();bctx.arc(s.x,s.y,s.r,0,7);bctx.fill()});bctx.globalAlpha=1}
+function show(id){["intro","story","question","pauseScreen","result"].forEach(k=>$(k).style.display=k===id?"flex":"none")}
+function toast(t){$("toast").textContent=t;$("toast").style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").style.opacity=0,1100)}
+function start(){[bg,world].forEach(c=>c.style.filter="brightness(1) saturate(1)");storyStep=0;playerY=0;vy=0;onGround=true;jumpsLeft=2;speed=260;answers=[];qIndex=0;score=0;shards=0;mics=0;brushes=0;lives=3;distance=0;prologueDistance=0;sceneTime=0;items=[];obstacles=[];particles=[];invuln=0;mode="prologue";beginPrologueScene()}
+function setNarrative(){
+ const card=storyCards[Math.max(0,Math.min(storyCards.length-1,storyStep))];if(!card)return;
+ $("narrativeHead").textContent=`探索 ${String(storyStep+1).padStart(2,'0')} / 05 · ${card[0]}`;
+ $("narrativeBody").textContent=card[1];$("narrativeQuote").textContent=card[2];
+}
+function softenSceneChange(){
+ // Keep the running canvas alive; use a short color/brightness bridge instead of hiding or rebuilding it.
+ [bg,world].forEach(c=>{c.style.filter="brightness(.78) saturate(.72)";});
+ requestAnimationFrame(()=>{[bg,world].forEach(c=>{c.style.filter="brightness(1) saturate(1)";});});
+}
+function syncHearts(){const visible=(mode==="run" || (mode==="prologue" && storyStep>=1));$("hearts").style.display=visible?"block":"none";$("hearts").textContent="♥ ".repeat(lives).trim()||"♡";}
+function beginPrologueScene(){softenSceneChange();prologueDistance=0;sceneTime=0;prologueSpawn=0;
+ const narration=storyCards[storyStep][1];
+ prologueLength=Math.round(Math.max(9,Math.min(12,narration.length/5+3))*260);
+ playerY=0;vy=0;onGround=true;jumpsLeft=2;speed=260;show("intro");$("intro").style.display="none";$("story").style.display="none";$("question").style.display="none";
+ $("narrative").style.display="block";$("storyBanner").style.display="block";$("storyProgress").style.width="0%";
+ $("chapter").textContent="剧情跑酷 · 探索 "+(storyStep+1)+"/5";$("hud").style.display="flex";$("jump").style.display="block";$("pause").style.display="block";
+ $("score").textContent=score;$("shards").textContent=shards;$("mics").textContent=mics;$("brushes").textContent=brushes;syncHearts();
+ active=true;paused=false;last=performance.now();items=[];obstacles=[];
+ for(let i=0;i<7;i++)items.push({x:W+180+i*205,y:ground()-65-(i%3)*30,type:"shard",got:false,phase:i});
+ for(let i=0;i<7;i++)obstacles.push({x:W+420+i*420,w:42,h:48,hit:false,kind:i%2?"alarm":"phone"});
+ if(storyStep===2){items.push({x:W+850,y:ground()-105,type:"mic",got:false,phase:2},{x:W+1370,y:ground()-125,type:"brush",got:false,phase:3});}
+ setNarrative();draw();cancelAnimationFrame(raf);const token=++loopToken;raf=requestAnimationFrame(now=>loop(now,token));
+}
+function nextStory(){
+ active=false;loopToken++;cancelAnimationFrame(raf);$("jump").style.display="none";$("pause").style.display="none";
+ qIndex=storyStep;show("question");showQuestion();
+}
+function showQuestion(){$("qNo").textContent=`INTERACTION 0${qIndex+1} / 05`;$("qTitle").textContent=questions[qIndex].q;$("qContext").textContent=questions[qIndex].c;const list=$("choiceList");list.innerHTML="";questions[qIndex].a.forEach((a,i)=>{let b=document.createElement("button");b.className="choice";b.innerHTML=`<span class="letter">${"ABC"[i]}</span><span>${a}</span>`;b.onclick=()=>answer(i);list.appendChild(b)})}
+function answer(i){answers[qIndex]=i;storyStep++;
+ if(storyStep<storyCards.length){beginPrologueScene();}
+ else{$("narrative").style.display="none";$("storyBanner").style.display="none";$("hud").style.display="none";show("story");$("storyHead").textContent="重新出发";$("storyBody").textContent="五次选择已经记录。现在进入正式跑酷，继续收集灵感碎片、麦克风与画笔，避开压力障碍！";$("storyAside").textContent="七种创作人格将在旅程结束后揭晓。";$("storyNext").textContent="进入正式挑战";$("storyNext").onclick=()=>{$("storyNext").onclick=nextStory;launch()};}
+}
+function launch(){$("narrative").style.display="none";$("storyBanner").style.display="none";mode="run";show("intro");$("intro").style.display="none";$("hud").style.display="flex";$("jump").style.display="block";$("pause").style.display="block";$("chapter").textContent="正式挑战 · 收集灵感";syncHearts();active=true;paused=false;last=performance.now();spawnInitial();cancelAnimationFrame(raf);const token=++loopToken;raf=requestAnimationFrame(now=>loop(now,token))}
+function spawnInitial(){for(let i=0;i<8;i++)spawnItem(W+180+i*170);for(let i=0;i<4;i++)spawnObstacle(W+500+i*520)}
+function spawnItem(x){let r=Math.random();let type=r<.67?"shard":r<.83?"mic":"brush";items.push({x,y:ground()-(type==="shard"?65+Math.random()*105:55),type,got:false,phase:Math.random()*6.28})}
+function spawnObstacle(x){obstacles.push({x,w:42,h:48+Math.random()*10,hit:false,kind:Math.random()<.5?"phone":"alarm"})}
+function jump(){if(!active||paused)return;if(jumpsLeft>0){vy=jumpsLeft===2?640:570;jumpsLeft--;onGround=false;burst(playerX(),ground()-playerY,"#c9fff0",jumpsLeft===1?7:4);}}
+function update(dt){if(mode==="prologue"){
+ prologueDistance+=speed*dt;sceneTime+=dt;speed=260;if(invuln>0)invuln-=dt;if(hitFlash>0)hitFlash-=dt;setNarrative();
+ obstacles.forEach(o=>{o.x-=speed*dt;if(!o.hit&&storyStep>=1&&invuln<=0&&o.x<playerX()+24&&o.x+o.w>playerX()-20&&playerY()<o.h+10){o.hit=true;lives=Math.max(0,lives-1);invuln=1.25;hitFlash=.22;syncHearts();if(lives<=0){finish();return}}});
+ obstacles=obstacles.filter(o=>o.x>-100);
+ if(obstacles.length<5&&prologueSpawn<18){obstacles.push({x:W+420+Math.random()*260,w:42,h:45+Math.random()*12,hit:false,kind:prologueSpawn%2?"alarm":"phone"});prologueSpawn++}
+ items.forEach(o=>{o.x-=speed*dt;o.y+=Math.sin(sceneTime*3+o.phase)*.25;if(!o.got&&Math.abs(o.x-playerX())<30&&Math.abs(o.y-(ground()-40-playerY))<55){o.got=true;if(o.type==="mic")mics++;else if(o.type==="brush")brushes++;else shards++;burst(o.x,o.y,o.type==="mic"?"#ffd36e":o.type==="brush"?"#ff9acb":"#9fffd0",12);toast(o.type==="mic"?"麦克风灵感 +1":o.type==="brush"?"画笔灵感 +1":"灵感碎片 +1")}});
+ items=items.filter(o=>o.x>-80&&!o.got);if(items.length<5&&prologueSpawn<18){items.push({x:W+340+Math.random()*260,y:ground()-65-Math.random()*75,type:storyStep===2&&Math.random()<.3?"mic":"shard",got:false,phase:Math.random()*6.28});prologueSpawn++}
+ vy-=gravity*dt;playerY+=vy*dt;if(playerY<=0){playerY=0;vy=0;onGround=true;jumpsLeft=2}
+ particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;p.vy+=100*dt});particles=particles.filter(p=>p.life>0);
+ $("storyProgress").style.width=Math.min(100,prologueDistance/prologueLength*100)+"%";syncHearts();$("shards").textContent=shards;$("mics").textContent=mics;$("brushes").textContent=brushes;
+ if(lives<=0){finish();return}if(prologueDistance>=prologueLength){nextStory()}return}distance+=speed*dt;score+=Math.floor(dt*12);speed=Math.min(430,260+distance*.012);if(invuln>0)invuln-=dt;if(hitFlash>0)hitFlash-=dt;
+ if(Math.random()<dt*1.25)spawnItem(W+50);if(Math.random()<dt*.55)spawnObstacle(W+60);
+ items.forEach(o=>{o.x-=speed*dt;o.y+=Math.sin(distance*.012+o.phase)*.2;if(!o.got&&Math.abs(o.x-playerX())<28&&Math.abs(o.y-(ground()-40-playerY))<48){o.got=true;if(o.type==="shard"){shards++;score+=20;toast("✧ 灵感碎片 +1")}else if(o.type==="mic"){mics++;score+=60;toast("🎤 麦克风能量 +1")}else{brushes++;score+=60;toast("🖌️ 画笔能量 +1")}burst(o.x,o.y,o.type==="mic"?"#ffd58b":o.type==="brush"?"#ff9acb":"#9fffd0",12)}});
+ obstacles.forEach(o=>{o.x-=speed*dt;if(!o.hit&&invuln<=0&&o.x<playerX()+24&&o.x+o.w>playerX()-20&&playerY()<o.h+10){o.hit=true;lives=Math.max(0,lives-1);invuln=1.25;hitFlash=.22;syncHearts();if(lives<=0)finish()}});
+ items=items.filter(o=>o.x>-80&&!o.got);obstacles=obstacles.filter(o=>o.x>-80);
+ vy-=gravity*dt;playerY+=vy*dt;if(playerY<=0){playerY=0;vy=0;onGround=true;jumpsLeft=2}
+ particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;p.vy+=180*dt});particles=particles.filter(p=>p.life>0);
+ $("score").textContent=score;$("shards").textContent=shards;$("mics").textContent=mics;$("brushes").textContent=brushes;syncHearts();
+ if(distance>10500){finish()}
+}
+function burst(x,y,color,n){n=Math.min(n,10);if(particles.length>70)particles.splice(0,particles.length-70);for(let i=0;i<n;i++){let a=Math.random()*Math.PI*2,v=40+Math.random()*150;particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.5+Math.random()*.4,color})}}
+function draw(){
+ drawBg();ctx.clearRect(0,0,W,H);const gy=ground(),time=performance.now()/1000,travel=mode==="prologue"?prologueDistance:distance,scene=mode==="prologue"?Math.min(storyStep,4):3;
+ const palettes=[
+  {sky:["#173c4a","#4f9b83","#b4dca0"],far:"#356b65",near:"#214c46",floor:"#203f3c",light:"#caff9a",accent:"#ffd98c"},
+  {sky:["#211a43","#633c73","#bd6384"],far:"#55365f",near:"#392747",floor:"#291e37",light:"#ffb2df",accent:"#ffd27d"},
+  {sky:["#101e46","#394e83","#8a8ed0"],far:"#344b7d",near:"#25345f",floor:"#1b284a",light:"#b6b4ff",accent:"#8ff5ee"},
+  {sky:["#172a49","#385c78","#7b8ba4"],far:"#344b65",near:"#243751",floor:"#18283d",light:"#9fffd0",accent:"#ff9acb"},
+  {sky:["#192a4c","#5a5487","#c18aa8"],far:"#514a78",near:"#333052",floor:"#252341",light:"#ffc2e3",accent:"#a8f4ff"},
+  {sky:["#101b3d","#59477d","#bb6d9c"],far:"#44365f",near:"#302644",floor:"#211c34",light:"#ff9acb",accent:"#ffe08d"},
+  {sky:["#111d3c","#394c76","#7884b5"],far:"#34436c",near:"#263354",floor:"#1b2744",light:"#b8c4ff",accent:"#ffe08d"}
+ ];const pal=palettes[scene]||palettes[0];
+ // Deep atmospheric sky and large environmental light source
+ let sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,pal.sky[0]);sky.addColorStop(.58,pal.sky[1]);sky.addColorStop(1,pal.sky[2]);ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+ let glow=ctx.createRadialGradient(W*.72,H*.28,5,W*.72,H*.28,Math.max(W,H)*.58);glow.addColorStop(0,pal.light+"55");glow.addColorStop(1,pal.light+"00");ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+ // Distant stars / motes
+ for(let i=0;i<54;i++){let x=((i*137-travel*.10)%(W+80)+W+80)%(W+80),y=(i*71%(Math.max(180,gy-80)));ctx.globalAlpha=.22+.35*(.5+.5*Math.sin(time*1.7+i));ctx.fillStyle=i%4===0?pal.accent:pal.light;ctx.beginPath();ctx.arc(x,y,1+(i%3)*.65,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+ // Distant layered silhouettes
+ for(let layer=0;layer<3;layer++){let base=gy-(layer===0?150:layer===1?95:48),parallax=.10+layer*.12;ctx.fillStyle=layer===0?pal.far:layer===1?pal.near:pal.floor;ctx.beginPath();ctx.moveTo(0,gy);for(let x=-100;x<=W+120;x+=80){let xx=x-((travel*parallax)%160);let yy=base+Math.sin((x+travel*parallax)*.008+layer)*22+(x%3)*5;ctx.lineTo(xx,yy);ctx.lineTo(xx+80,yy+12)}ctx.lineTo(W,gy);ctx.closePath();ctx.globalAlpha=.48+layer*.18;ctx.fill();ctx.globalAlpha=1}
+ // Signature set pieces for each chapter
+ if(scene===0){ // lush idea garden: giant trees, mushrooms, flowers, floating seed pods
+  for(let i=0;i<7;i++){let x=((i*210-travel*.32)%(W+260)+W+260)%(W+260)-70,scale=.65+(i%3)*.22, y=gy-115-(i%2)*20;ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle="#244e48";ctx.fillRect(-8,-95,16,100);ctx.fillStyle=i%2?"#65b98c":"#8acb9b";ctx.beginPath();ctx.arc(0,-112,42,0,7);ctx.arc(-25,-94,27,0,7);ctx.arc(25,-91,30,0,7);ctx.fill();ctx.fillStyle="#d7ffb0";ctx.globalAlpha=.65;ctx.beginPath();ctx.arc(-12,-125,7,0,7);ctx.fill();ctx.restore()}
+  for(let i=0;i<10;i++){let x=((i*113-travel*.65)%(W+120)+W+120)%(W+120);let y=gy-24-(i%3)*12;ctx.fillStyle=i%2?"#ffb5cb":"#ffe18e";ctx.beginPath();ctx.arc(x,y,5+(i%3),0,7);ctx.fill();ctx.strokeStyle="#8ed59a";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y+5);ctx.lineTo(x+2,y+18);ctx.stroke()}
+ }else if(scene===1){ // overloaded inspiration core: giant fractured crystal and energy rings
+  let cx=W*.73,cy=H*.30;ctx.save();ctx.translate(cx,cy);ctx.rotate(Math.sin(time*.7)*.08);for(let r=0;r<4;r++){ctx.strokeStyle=r%2?"#ffc0df55":"#ffe6a055";ctx.lineWidth=2+r*.7;ctx.beginPath();ctx.ellipse(0,0,75+r*25,32+r*17,time*.18+r*.5,0,Math.PI*2);ctx.stroke()}ctx.shadowBlur=40;ctx.shadowColor="#ff9acb";ctx.fillStyle="#ffb5dc";ctx.beginPath();ctx.moveTo(0,-94);ctx.lineTo(36,-25);ctx.lineTo(20,68);ctx.lineTo(-25,54);ctx.lineTo(-40,-22);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle="#fff0fa";ctx.beginPath();ctx.moveTo(0,-80);ctx.lineTo(8,-12);ctx.lineTo(-15,37);ctx.lineTo(-22,-22);ctx.closePath();ctx.fill();ctx.restore();
+  for(let i=0;i<16;i++){let x=((i*97-travel*.48)%(W+100)+W+100)%(W+100),y=80+(i*59%Math.max(100,gy-100))+Math.sin(time*2+i)*18;ctx.save();ctx.translate(x,y);ctx.rotate(time*(i%2?1:-1)+i);ctx.fillStyle=i%2?"#ff9acb":"#ffd58b";ctx.globalAlpha=.75;ctx.beginPath();ctx.moveTo(0,-13-i%3*4);ctx.lineTo(9,0);ctx.lineTo(0,15);ctx.lineTo(-8,0);ctx.closePath();ctx.fill();ctx.restore()}
+ }else{ // surreal memory / imagination zone: floating islands, portals, giant clockwork rings
+  for(let i=0;i<5;i++){let x=((i*235-travel*.27)%(W+280)+W+280)%(W+280)-80,y=gy-155-(i%3)*62;ctx.save();ctx.translate(x,y);ctx.fillStyle="#7886c4";ctx.globalAlpha=.65;ctx.beginPath();ctx.ellipse(0,0,60,13,0,0,7);ctx.fill();ctx.fillStyle="#b8b7ff";ctx.beginPath();ctx.moveTo(-28,-4);ctx.lineTo(-13,-35);ctx.lineTo(10,-42);ctx.lineTo(28,-4);ctx.closePath();ctx.fill();ctx.strokeStyle="#d7d4ff88";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-10,36+Math.sin(time+i)*4,0,7);ctx.stroke();ctx.restore()}
+  for(let i=0;i<4;i++){let x=((i*270-travel*.18)%(W+300)+W+300)%(W+300);let y=gy-245-(i%2)*45;ctx.strokeStyle="#a9baff66";ctx.lineWidth=7;ctx.beginPath();ctx.arc(x,y,35+i*5,time*.3+i,time*.3+i+Math.PI*1.7);ctx.stroke();ctx.fillStyle="#fff0b5";ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill()}
+ }
+ // Scene-specific story motifs: memory frames, sound/color artifacts, storm ribbons and the dim core.
+ if(scene===3){for(let i=0;i<5;i++){let x=((i*190-travel*.38)%(W+220)+W+220)%(W+220);ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle="#ffe3b5";ctx.lineWidth=3;ctx.strokeRect(x,gy-260-(i%2)*45,78,58);ctx.fillStyle=i%2?"#f5a8c8":"#a9c8ff";ctx.fillRect(x+8,gy-250-(i%2)*45,62,38);ctx.restore()}}
+ if(scene===4){for(let i=0;i<4;i++){let x=((i*250-travel*.3)%(W+260)+W+260)%(W+260);ctx.strokeStyle="#8feaff99";ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(x,gy-190-(i%2)*50,38,12,time+i,0,Math.PI*2);ctx.stroke();ctx.fillStyle="#ffe3a3";ctx.font="28px sans-serif";ctx.fillText(i%2?"🎤":"🖌️",x-15,gy-215-(i%2)*50)}}
+ if(scene===5){ctx.save();for(let i=0;i<9;i++){ctx.strokeStyle=i%2?"#ff9acb66":"#9fffd066";ctx.lineWidth=9;ctx.beginPath();let x=((i*150-travel*.7)%(W+180)+W+180)%(W+180);ctx.moveTo(x,70);ctx.bezierCurveTo(x+70,gy*.25,x-60,gy*.6,x+30,gy-35);ctx.stroke()}ctx.restore()}
+ // Ground plane with moving paving and luminous rails
+ ctx.fillStyle=pal.floor;ctx.fillRect(0,gy,W,H-gy);let groundGrad=ctx.createLinearGradient(0,gy,0,H);groundGrad.addColorStop(0,pal.near);groundGrad.addColorStop(1,"#10172a");ctx.fillStyle=groundGrad;ctx.fillRect(0,gy,W,H-gy);ctx.strokeStyle=pal.light+"aa";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();
+ for(let i=0;i<13;i++){let x=((i*100-travel*1.05)%(W+110)+W+110)%(W+110);ctx.fillStyle=pal.accent+"55";ctx.beginPath();ctx.moveTo(x,gy+7);ctx.lineTo(x+35,gy+7);ctx.lineTo(x+20,gy+11);ctx.lineTo(x-15,gy+11);ctx.closePath();ctx.fill()}
+ // Clearly identifiable pressure hazards: red mobile phone and DDL alarm clock.
+ obstacles.forEach((o)=>{ctx.save();let x=o.x,y=gy;ctx.shadowBlur=18;ctx.shadowColor="#ff526f";
+  if(o.kind==="phone"){
+   ctx.fillStyle="#e64f70";ctx.strokeStyle="#ffd6df";ctx.lineWidth=2.5;ctx.beginPath();ctx.roundRect(x,y-o.h,o.w,o.h,8);ctx.fill();ctx.stroke();
+   ctx.fillStyle="#351d36";ctx.beginPath();ctx.roundRect(x+5,y-o.h+7,o.w-10,o.h-17,4);ctx.fill();
+   ctx.fillStyle="#ffdf8a";ctx.font="bold 10px sans-serif";ctx.textAlign="center";ctx.fillText("!",x+o.w/2,y-o.h+24);ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(x+o.w/2,y-6,2,0,Math.PI*2);ctx.fill();
+  }else{
+   ctx.fillStyle="#ff9a4f";ctx.strokeStyle="#ffe3a7";ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x+o.w/2,y-o.h/2,o.w*.48,0,Math.PI*2);ctx.fill();ctx.stroke();
+   ctx.strokeStyle="#ffe3a7";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x+9,y-o.h+2);ctx.lineTo(x+3,y-o.h-7);ctx.moveTo(x+o.w-9,y-o.h+2);ctx.lineTo(x+o.w-3,y-o.h-7);ctx.stroke();
+   ctx.strokeStyle="#402d45";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+o.w/2,y-o.h/2);ctx.lineTo(x+o.w/2,y-o.h/2-10);ctx.moveTo(x+o.w/2,y-o.h/2);ctx.lineTo(x+o.w/2+9,y-o.h/2+4);ctx.stroke();
+   ctx.fillStyle="#fff3d0";ctx.font="bold 8px sans-serif";ctx.textAlign="center";ctx.fillText("DDL",x+o.w/2,y-3);
+  }ctx.restore()});
+ // Collectible sparks in formal stage; subtle ambient motes in prologue
+ items.forEach(o=>{ctx.save();ctx.translate(o.x,o.y+Math.sin(time*3+o.phase)*6);ctx.shadowBlur=24;ctx.shadowColor=o.type==="mic"?"#ffd36e":o.type==="brush"?"#ff82c5":"#8dffbd";if(o.type==="shard"){ctx.rotate(Math.PI/4+time*.8);ctx.fillStyle="#9dffbf";ctx.strokeStyle="#eafff2";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-13);ctx.lineTo(11,0);ctx.lineTo(0,13);ctx.lineTo(-11,0);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle="#ffffff";ctx.fillRect(-2,-7,3,8)}else{ctx.fillStyle=o.type==="mic"?"#ffd36e":"#ff82c5";ctx.beginPath();ctx.arc(0,0,19,0,Math.PI*2);ctx.fill();ctx.font="bold 22px sans-serif";ctx.textAlign="center";ctx.fillStyle="#25304a";ctx.fillText(o.type==="mic"?"♫":"✎",0,8);ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,24,0,Math.PI*2);ctx.stroke()}ctx.restore()});
+ // Hero: detailed fairy sprite with hair, face, dress, articulated legs and flapping wings
+ ctx.save();ctx.translate(playerX(),gy-7-playerY);if(hitFlash>0){ctx.globalAlpha=Math.min(.5,hitFlash*2.2);ctx.fillStyle="#ff5577";ctx.beginPath();ctx.arc(0,-34,31,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}let run=Math.sin(time*13),wing=Math.sin(time*24)*.55;if(invuln>0&&Math.floor(time*12)%2===0)ctx.globalAlpha=.38;
+ // shadow under the fairy
+ ctx.globalAlpha*=.55;ctx.fillStyle="#081321";ctx.beginPath();ctx.ellipse(0,7,25,6,0,0,7);ctx.fill();ctx.globalAlpha=invuln>0&&Math.floor(time*12)%2===0?.38:1;
+ // wings behind body
+ for(let side of [-1,1]){ctx.save();ctx.translate(side*9,-31);ctx.rotate(side*wing*.35);ctx.fillStyle=scene===1?"#ffd0ed":"#b9fff0";ctx.globalAlpha=.72;ctx.shadowBlur=16;ctx.shadowColor=pal.light;ctx.beginPath();ctx.ellipse(side*13,-5,9,22,side*.5,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(side*22,9,7,15,side*.8,0,7);ctx.fill();ctx.restore()}
+ ctx.globalAlpha=1;ctx.strokeStyle="#f3c9a9";ctx.lineWidth=4;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-7,-17);ctx.lineTo(-11+run*4,-5);ctx.moveTo(7,-17);ctx.lineTo(12-run*4,-6);ctx.stroke();
+ // dress / torso
+ ctx.fillStyle=scene===1?"#ffb4d7":"#a5f4d7";ctx.shadowBlur=15;ctx.shadowColor=pal.light;ctx.beginPath();ctx.moveTo(-10,-30);ctx.quadraticCurveTo(0,-37,10,-30);ctx.lineTo(15,-5);ctx.quadraticCurveTo(0,2,-15,-5);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+ ctx.fillStyle="#f7d5b5";ctx.beginPath();ctx.arc(0,-43,13,0,7);ctx.fill();
+ // hair cap and long side locks
+ ctx.fillStyle="#76508e";ctx.beginPath();ctx.arc(0,-48,14,Math.PI,Math.PI*2);ctx.lineTo(13,-40);ctx.quadraticCurveTo(5,-45,0,-42);ctx.quadraticCurveTo(-10,-37,-14,-42);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(-11,-43);ctx.quadraticCurveTo(-18,-30,-10,-23);ctx.lineTo(-6,-36);ctx.fill();
+ // eyes, cheeks, smile
+ ctx.fillStyle="#29334d";ctx.beginPath();ctx.arc(-4,-43,1.7,0,7);ctx.arc(4,-43,1.7,0,7);ctx.fill();ctx.fillStyle="#f08eaa";ctx.beginPath();ctx.arc(-8,-38,2.2,0,7);ctx.arc(8,-38,2.2,0,7);ctx.fill();ctx.strokeStyle="#9b5e72";ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,-39,3,0.2,Math.PI-.2);ctx.stroke();
+ // legs with running cycle
+ ctx.strokeStyle="#f3c9a9";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-5,-5);ctx.lineTo(-8+run*7,2);ctx.moveTo(5,-5);ctx.lineTo(8-run*7,2);ctx.stroke();ctx.fillStyle="#ffd58b";ctx.beginPath();ctx.arc(0,-61,3,0,7);ctx.fill();ctx.restore();
+ // foreground grass / crystals create depth
+ if(scene===0){for(let i=0;i<22;i++){let x=((i*59-travel*1.3)%(W+60)+W+60)%(W+60);ctx.strokeStyle=i%2?"#83c88d":"#d4e99a";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,gy+23);ctx.quadraticCurveTo(x-8,gy+4,x+Math.sin(time+i)*5,gy-3);ctx.stroke()}}
+ particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.shadowBlur=0;ctx.beginPath();ctx.arc(p.x,p.y,3.5,0,7);ctx.fill()});ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+function roundRect(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);c.fill()}
+function loop(now,token){
+ if(!active||token!==loopToken)return;
+ const dt=Math.max(0,Math.min((now-last)/1000,.033));last=now;
+ try{if(!paused){update(dt);if(token===loopToken&&active)draw();}}
+ catch(err){console.error("Game frame error:",err);}
+ if(active&&token===loopToken)raf=requestAnimationFrame(t=>loop(t,token));
+}
+function pause(){if(!active)return;paused=true;$("pauseScreen").style.display="flex"}
+function resume(){paused=false;$("pauseScreen").style.display="none";last=performance.now()}
+function finish(){if(!active)return;active=false;loopToken++;cancelAnimationFrame(raf);$("hud").style.display="none";$("jump").style.display="none";$("pause").style.display="none";let counts=Array(7).fill(0);
+ // Five answers map to seven creative tendencies; combined profile uses all five choices.
+ const map=[[0,6,1],[2,3,1],[4,5,0],[0,6,1],[0,3,6]];
+ answers.forEach((a,i)=>{counts[map[i][a]]+=2});
+ // Collection behavior adds a modest signal without overriding story answers.
+ counts[1]+=Math.min(3,shards/5);counts[4]+=Math.min(2,brushes);counts[5]+=Math.min(2,mics);
+ let idx=counts.indexOf(Math.max(...counts));let t=archetypes[idx],sum=counts.reduce((a,b)=>a+b,0)||1,rate=Math.round(counts[idx]/sum*100);
+ $("avatarCard").style.setProperty("--accent",t.color);$("resultPanel").style.setProperty("--accent",t.color);
+ $("avatar").textContent=t.emoji;$("typeEnglish").textContent=t.en;$("typeName").textContent=t.name;$("typeQuote").textContent="「"+t.quote+"」";$("typeDesc").textContent=t.desc;$("typeAdvice").textContent="创作建议："+t.advice;$("typeScore").textContent=rate;$("meterFill").style.width=rate+"%";$("finalScore").textContent=score;$("finalShard").textContent=shards;$("finalSpecial").textContent=mics+brushes;
+ show("result");$("chapter").textContent="灵感档案 · 已生成";
+}
+function restart(){$("narrative").style.display="none";active=false;loopToken++;cancelAnimationFrame(raf);$("pauseScreen").style.display="none";$("result").style.display="none";$("storyNext").textContent="继续探索";$("storyNext").onclick=nextStory;start()}
+$("begin").onclick=start;$("storyNext").onclick=nextStory;$("jump").onclick=jump;$("pause").onclick=pause;$("resume").onclick=resume;$("restart").onclick=restart;$("playAgain").onclick=restart;
+$("share").onclick=()=>{let t=archetypes.find(a=>a.en===$("typeEnglish").textContent);let s=`创想大师人格档案：${t.name} / ${t.en}\n${t.quote}\n灵感共鸣指数：${$("typeScore").textContent}\n跑酷积分：${score}｜灵感碎片：${shards}｜特殊灵感：${mics+brushes}\n#创想大师 #灵感世界修复计划`;if(navigator.clipboard?.writeText)navigator.clipboard.writeText(s).then(()=>toast("人格卡文案已复制")).catch(()=>prompt("复制人格卡",s));else prompt("复制人格卡",s)};
+window.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="ArrowUp"){e.preventDefault();jump()}if(e.code==="Escape"&&active){paused?resume():pause()}});
+window.addEventListener("resize",resize);resize();
+})();
+</script></body></html>
